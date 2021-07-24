@@ -1,0 +1,140 @@
+﻿
+https://blog.csdn.net/sanyiji/article/details/105591536（库配置全）
+https://www.cnblogs.com/ambition921009/p/10576187.html（opencv）
+1.Pangolin库
+	sudo apt-get install libglew-dev  
+	sudo apt-get install cmake  
+	sudo apt-get install libboost-dev libboost-thread-dev libboost-filesystem-dev 
+	sudo apt-get install libpython2.7-dev
+	git clone https://github.com/stevenlovegrove/Pangolin.git
+	cd Pangolin
+	mkdir build
+	cd build
+	cmake -DCPP11_NO_BOOST=1 .. 
+	make -j 
+	sudo make install
+
+	CMakeList.txt中要加上几个相关语句
+	find_package(Pangolin)
+	target_link_libraries(<工程名>, ${Pangolin_LIBRARIES})
+————————————————
+2.Sophus库
+(1)安装sophus,带模板，适用于高翔的slambook2的代码
+	git clone https://github.com/strasdat/Sophus.git
+	mkdir build
+	cd build
+	cmake ..
+	make
+	sudo make install
+（2）安装fmt
+	git clone https://github.com/fmtlib/fmt.git
+	mkdir build
+	cd build
+	cmake ..
+	make
+	sudo make install
+(3)检查
+	fmt --version
+	ls /usr/local/include/sophus/
+（4）CMakeList.txt中要加上几个相关语句
+cmake_minimum_required( VERSION 2.8 )
+set(CMAKE_BUILD_TYPE "Debug")
+project(ch4_useSophus)
+find_package( Sophus REQUIRED ) #if found, xx_INCLUDE_DIRS and xx_LIBRARIES can be used below
+include_directories( "/usr/include/eigen3" )
+include_directories(${Sophus_INCLUDE_DIRS})
+add_executable(ch4_useSophus ch4_useSophus.cpp)
+target_link_libraries(ch4_useSophus ${Sophus_LIBRARIES})
+find_package( fmt )
+target_link_libraries(ch4_useSophus PRIVATE fmt::fmt-header-only)
+
+————————————————
+3.opencv
+https://github.com/opencv/opencv_3rdparty/tree/ippicv/master_20151201/ippicv    下载ippicv_linux_20151201.tgz的一个包
+https://pan.baidu.com/s/16Sy0IZAq3gI4NPIefBVxLw   nfvo   百度网盘
+
+编译opencv3时出现/usr/include/c++/7/cstdlib:75:15: fatal error: stdlib.h: No such file or directory的解决办法
+cmake -DENABLE_PRECOMPILED_HEADERS=OFF
+
+输入命令 pkg-config --modversion opencv查看版本.
+查看当前环境下opencv所拥有的lib库。输入命令pkg-config opencv --libs 输出的就是lib库名
+
+当自己所写的程序使用到opencv3时，在 FIND_PACKAGE( OpenCV REQUIRED ) 前，添加set(OpenCV_DIR "usr/local/opencv3/share/OpenCV") 这样计算机就找到opencv3的对应头文件和库文件了，如果继续使用opencv2，不添加这一句就可以。
+cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local ..
+————————————————
+4. Ceres
+sudo apt-get install liblapack-dev libsuitesparse-dev libcxsparse3.1.4 libgflags-dev libgoogle-glog-dev libgtest-dev
+注意：ubuntu16.04装   libcxsparse3.1.4 版本
+ceres下载：  https://github.com/ceres-solver/ceres-solver
+要求：eigen版本必须为3.3.3以上
+运行代码报错：error: ‘integer_sequence’ is not a member of ‘std’，CMakeLists文件中set(CMAKE_CXX_FLAGS "-std=c++14 -O3")修改为set(CMAKE_CXX_STANDARD 14)
+————————————————
+5.g2o //建议使用高翔的g2o，不然会有版本问题
+find_package( fmt )
+target_link_libraries(pose_estimation_3d2d PRIVATE fmt::fmt-header-only）
+
+sudo apt-get install qt5-qmake qt5-default libqglviewer-dev-qt5 libsuitesparse-dev libcholmod3
+无法定位软件包 libcholmod3:    输入sudo apt-get install libcholmod然后按Tab键
+无法定位软件包 libqglviewer-dev-qt5:  sudo apt-get install libqt4-dev qt4-qmake qt4-default libqglviewer-dev-qt4
+
+****升级cmake
+g2o要求高版本的cmake，首先cmake --version查看cmake版本，若低于3.8 ，升级方法如下：
+sudo apt-get install build-essential
+（http://www.cmake.org/files  这个网站里面有cmake的所有版本的列表，根据需要下载对应的cmake版本）
+wget http://www.cmake.org/files/v3.15/cmake-3.15.1.tar.gz
+tar xf cmake-3.15.1.tar.gz
+cd cmake-3.15.1
+./configure
+make
+sudo apt-get install checkinstall
+sudo checkinstall
+这时在终端输入：cmake --version ,便可以显示版本
+
+下载g2o： https:/github.com/RainerKuemmerle/g2o
+
+————————————————
+mkdir build
+cd build
+cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local/opencv3 ..
+make -j4
+sudo make install
+set(OpenCV_DIR "/usr/local/opencv3/share/OpenCV")
+
+6.opencv4    ch8
+sudo apt-get install build-essential libgtk2.0-dev libgtk-3-dev libavcodec-dev libavformat-dev libjpeg-dev libswscale-dev libtiff5-dev
+sudo apt install libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev
+sudo apt install python3-dev python3-numpy
+sudo apt install libpng-dev libopenexr-dev libtiff-dev libwebp-dev
+
+下载opencv4.2.0     链接： opencv.org
+ippicv_2019_lnx_intel64_general_20180723.tgz   链接:   https://github.com/opencv/opencv_3rdparty/blob/ippicv/master_20180723/ippicv/ippicv_2019_lnx_intel64_general_20180723.tgz
+配置过程为将之前最开始下载并提取的opencv4.1.2文件夹中的opencv4.1.2/3rdparty/ippicv/ippicv.cmake文件将47行引号内部改为：“file:~/Downloads/” 改为自己放置ippicv_2019_lnx_intel64_general_20180723.tgz的路径
+mkdir build
+cd build
+cmake -D CMAKE_BUILD_TYPE=Release -D OPENCV_GENERATE_PKGCONFIG=ON -D CMAKE_INSTALL_PREFIX=/usr/local/opencv4 ..
+make 
+sudo make install
+
+set(OpenCV_DIR "/usr/local/opencv4/lib/cmake/opencv4")
+find_package(OpenCV 4 REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS}）
+
+报错error: ‘CV_GRAY2BGR’ was not declared in this scope  cv::cvtColor(img2, img2_single, CV_GRAY2BGR);
+则需要将CV_GRAY2BGR，更新为COLOR_GRAY2BGR。
+
+在直接法中报错fatal error: boost/format.hpp: 没有那个文件或目录
+下载boost   链接 ： （可能链接无效，百度boost）
+wget https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.tar.gz
+tar zxvf boost_1_64_0.tar.gz
+cd boost_1_64_0.tar.gz
+./bootstrap.sh --with-libraries=all
+./b2 toolset=gcc
+./b2 install --prefix=/usr  ##--prefix=/usr用来指定boost的安装目录，不加此参数的话默认的头文件在/usr/local/include/boost目录下，库文件在/usr/local/lib/目录下。这里把安装目录指定为--prefix=/usr则boost会直接安装到系统头文件目录和库文件目录下，可以省略配置环境变量。
+
+原文链接：https://blog.csdn.net/u011641865/article/details/73498533
+ldconfig
+————————————————
+7.磁盘扩展
+sudo apt-get install gparted
+gparted
+sudo longfig
